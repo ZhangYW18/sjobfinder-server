@@ -40,23 +40,38 @@ router.post('/register', function(req, res) {
 router.post('/login', function(req, res) {
   const {username, password} = req.body
   const query = UserModel.where({ username: username });
-  query.select('_id username password');
   query.findOne( function (err, user) {
     if (err) {
       logger(err.message)
-      res.send({code: 1, msg: err.message})
+      res.send({
+        code: 1,
+        msg: err.message,
+      })
       return;
     }
     if (user) {
       if (user.password === md5(password)) {
         // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7})
         res.cookie('userid', user._id, {maxAge: 1000})
-        res.send({code: 0, msg: 'Login success!'})
+        res.send({
+          code: 0,
+          data: {
+            username: user.username,
+            identity: user.identity,
+          },
+          msg: 'Login success!',
+        })
       } else {
-        res.send({code: 1, msg: 'Password is incorrect'})
+        res.send({
+          code: 1,
+          msg: 'Incorrect Password',
+        })
       }
     } else {
-      res.send({code: 1, msg: 'User doesn\'t exist'})
+      res.send({
+        code: 1,
+        msg: `Invalid Username`,
+      })
     }
   })
 });
