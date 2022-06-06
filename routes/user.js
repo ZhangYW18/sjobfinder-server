@@ -11,7 +11,7 @@ const {UserModel} = require('../db/models')
 router.post('/register', function(req, res) {
   const {username, password, identity} = req.body
   const query = UserModel.where({ username: username });
-  query.select('username');
+  query.select('_id');
   query.findOne(function (err, user) {
     if (err) {
       logger(err.message)
@@ -19,7 +19,7 @@ router.post('/register', function(req, res) {
       return;
     }
     if (user) {
-      res.send({code: 1, msg: `User ${user.username} already exists`})
+      res.send({code: 1, msg: `Username already exists`})
     } else {
       new UserModel({
         username,
@@ -29,8 +29,15 @@ router.post('/register', function(req, res) {
         // Cookie is valid for 7 days
         // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7})
         res.cookie('userid', user._id, {maxAge: 1000})
-        const data = {_id: user._id, username, identity}
-        res.send({code: 0, data: data, msg: 'Register Success!'})
+        res.send({
+          code: 0,
+          data: {
+            _id: user._id,
+            username,
+            identity,
+          },
+          msg: 'Register Success!',
+        })
       })
     }
   })
@@ -56,6 +63,7 @@ router.post('/login', function(req, res) {
         res.send({
           code: 0,
           data: {
+            _id: user._id,
             username: user.username,
             identity: user.identity,
           },
