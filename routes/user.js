@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+
 var logger = require('morgan');
 var md5 = require('blueimp-md5')
 
@@ -82,6 +83,33 @@ router.post('/login', function(req, res) {
       })
     }
   })
+});
+
+/* POST /user/profile deals with updating a user's profile. */
+router.post('/profile', function(req, res) {
+  const {_id, name, avatar, introduction, preference, company} = req.body
+
+  if (Number(avatar) < 0 || Number(avatar) >= 20) {
+    res.send({code: 1, msg: `Parameter "avatar" is out of range`})
+    return
+  }
+
+  UserModel.updateOne(
+    {
+      _id
+    },
+    {
+      name, avatar, introduction, preference, company
+    },
+    function (err, _) {
+      if (err) {
+        logger(err.message)
+        res.send({code: 1, msg: err.message})
+        return;
+      }
+      res.send({code: 0, msg: `Update Profile Success`})
+    }
+  )
 });
 
 module.exports = router;
