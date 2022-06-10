@@ -7,6 +7,7 @@ mongoose.connection.on('connected', () => {
 
 // Define job model.
 const jobSchema = mongoose.Schema({
+  userId: {type: String, required: true},   // posted by
   title: {type: String, required: true},
   description: {type: String},
   level: {type: Number},                    // 1: entry level, 2: mid level, 3: senior level
@@ -29,7 +30,6 @@ const userSchema = mongoose.Schema({
   preference: {type: String},               // job reference
   // recruiter-only fields
   company: {type: String},
-  jobs: {type: [jobSchema]},
 })
 const UserModel = mongoose.model('user', userSchema) // users collection
 exports.UserModel = UserModel

@@ -4,7 +4,7 @@ var router = express.Router();
 var logger = require('morgan');
 var md5 = require('blueimp-md5')
 
-const {UserModel} = require('../db/models')
+const {UserModel, JobModel} = require('../db/models')
 
 /* POST /user/register deals with register actions.
 * If the user already registered, return error.
@@ -15,8 +15,8 @@ router.post('/register', function(req, res) {
   query.select('_id');
   query.findOne(function (err, user) {
     if (err) {
-      logger(err.message)
-      res.send({code: 1, msg: err.message})
+      logger(err)
+      res.send({code: 1, msg: err.toString()})
       return;
     }
     if (user) {
@@ -33,9 +33,11 @@ router.post('/register', function(req, res) {
         res.send({
           code: 0,
           data: {
-            _id: user._id,
-            username,
-            identity,
+            user: {
+              _id: user._id,
+              username,
+              identity,
+            },
           },
           msg: 'Register Success!',
         })
@@ -47,13 +49,12 @@ router.post('/register', function(req, res) {
 /* POST /user/login deals with user login requests. */
 router.post('/login', function(req, res) {
   const {username, password} = req.body
-  const query = UserModel.where({ username: username });
-  query.findOne( function (err, user) {
+  UserModel.where({ username: username }).findOne( function (err, user) {
     if (err) {
-      logger(err.message)
+      logger(err)
       res.send({
         code: 1,
-        msg: err.message,
+        msg: err.toString(),
       })
       return;
     }
@@ -61,14 +62,14 @@ router.post('/login', function(req, res) {
       if (user.password === md5(password)) {
         // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7})
         res.cookie('userid', user._id, {maxAge: 1000})
+        const data = user;
+        data.password = '';
         res.send({
           code: 0,
           data: {
-            _id: user._id,
-            username: user.username,
-            identity: user.identity,
+            user: data
           },
-          msg: 'Login success!',
+          msg: 'Login Success',
         })
       } else {
         res.send({
@@ -103,13 +104,33 @@ router.post('/profile', function(req, res) {
     },
     function (err, _) {
       if (err) {
-        logger(err.message)
-        res.send({code: 1, msg: err.message})
+        logger(err)
+        res.send({code: 1, msg: err.toString()})
         return;
       }
       res.send({code: 0, msg: `Update Profile Success`})
     }
   )
 });
+
+/* GET /user/profile deals with updating a user's profile. */
+// router.get('/profile/:id', function(req, res) {
+//   const {id} = req.params
+//
+//   UserModel.findById(id, function (err, user) {
+//     if (err) {
+//       logger(err)
+//       res.send({code: 1, msg: err.toString()})
+//       return;
+//     }
+//     if (user == null) {
+//       res.send({code: 1, msg: 'User Not Found'})
+//       return;
+//     }
+//     res.send({code: 0, data:user, msg: err.toString()})
+//   })
+//   //console.log(data)
+//
+// });
 
 module.exports = router;

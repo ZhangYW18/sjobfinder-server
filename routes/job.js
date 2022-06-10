@@ -9,27 +9,89 @@ const {JobModel, UserModel} = require('../db/models')
 router.post('/add', function(req, res) {
   const {userId, title, level, description} = req.body
   const now = Date.now()
-  const job = new JobModel({
+  new JobModel({
+    userId,
     title,
     level,
     description,
     create_time: now,
     update_time: now,
-  });
-  // Judge whether the one who post the job exists first.
-  UserModel.updateOne(
-    // Must be a recruiter to post a job
-    {_id: userId, identity: "recruiter"},
-    { $push: { jobs: job } },
-    function (err, _) {
+  }).save(function (err, job) {
+    if (err) {
+      logger(err.toString())
+      res.send({code: 1, msg: err.toString()})
+      return;
+    }
+    res.send({code: 0, msg: 'Add Job Success'})
+  })
+});
+
+router.post('/update', function(req, res) {
+  const {_id, title, level, description} = req.body
+  JobModel.findByIdAndUpdate(
+    _id,
+  {
+    title,
+    level,
+    description,
+    update_time: Date.now(),
+  }, function (err, _) {
+      console.log(err)
       if (err) {
-        logger(err.message)
-        res.send({code: 1, msg: err.message})
+        logger(err)
+        res.send({code: 1, msg: err.toString()})
         return;
       }
-      res.send({code: 0, msg: `Add New Job Post Success`})
+      res.send({code: 0, msg: `Update Job Success`})
+    })
+});
+
+router.get('/get/:id', function(req, res) {
+  const {id} = req.params
+  JobModel.findById(id, function (err, job) {
+    if (err) {
+      logger(err)
+      res.send({code: 1, msg: err.toString()})
+      return;
     }
-  )
+    if (job == null) {
+      res.send({code: 1, msg: 'Not Found'})
+      return;
+    }
+    res.send({code: 0, data: job, msg: `Get Job Success`})
+  })
+});
+
+router.get('/getByUser/:userId', function(req, res) {
+  const {userId} = req.params
+  console.log(userId)
+  JobModel.find({
+    userId,
+  }, function (err, jobs) {
+    if (err) {
+      logger(err)
+      res.send({code: 1, msg: err.toString()})
+      return;
+    }
+    res.send({
+      code: 0,
+      data: jobs,
+      msg: `Get Job Success`
+    })
+  })
+});
+
+router.get('/delete/:id', function(req, res) {
+  const {id} = req.params;
+  console.log(id);
+  JobModel.findByIdAndDelete(id,  function (err, _) {
+    if (err) {
+      logger(err)
+      res.send({code: 1, msg: err.toString()})
+      return;
+    }
+    res.send({code: 0, msg: `Delete Job Success`})
+  })
 });
 
 module.exports = router;
