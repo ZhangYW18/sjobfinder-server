@@ -90,25 +90,27 @@ router.post('/login', function(req, res) {
 router.post('/profile', function(req, res) {
   const {_id, name, avatar, introduction, preference, company} = req.body
 
-  if (Number(avatar) < 0 || Number(avatar) >= 20) {
+  // Judge if "avatar" parameter is out of range
+  if (avatar !== undefined && (Number(avatar) < 0 || Number(avatar) >= 20)) {
     res.send({code: 1, msg: `Parameter "avatar" is out of range`})
     return
   }
 
-  UserModel.updateOne(
-    {
-      _id
-    },
+  UserModel.findByIdAndUpdate(_id,
     {
       name, avatar, introduction, preference, company
     },
-    function (err, _) {
+    {
+      new: true,
+    },
+    function (err, user) {
       if (err) {
-        logger(err)
+        logger(err.toString())
         res.send({code: 1, msg: err.toString()})
         return;
       }
-      res.send({code: 0, msg: `Update Profile Success`})
+      user.password = '';
+      res.send({code: 0, data: {user: user}, msg: `Update Profile Success`})
     }
   )
 });
