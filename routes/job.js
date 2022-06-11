@@ -8,6 +8,7 @@ const {JobModel, UserModel} = require('../db/models')
 /* POST /job/add deals with adding a job post. */
 router.post('/add', function(req, res) {
   const {userId, title, level, description} = req.body
+  // console.log(req.body)
   const now = Date.now()
   new JobModel({
     userId,
@@ -22,7 +23,7 @@ router.post('/add', function(req, res) {
       res.send({code: 1, msg: err.toString()})
       return;
     }
-    res.send({code: 0, msg: 'Add Job Success'})
+    res.send({code: 0, data: {jobId: job._id}, msg: 'Add Job Success'})
   })
 });
 

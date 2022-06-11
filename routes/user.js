@@ -60,17 +60,40 @@ router.post('/login', function(req, res) {
     }
     if (user) {
       if (user.password === md5(password)) {
-        // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7})
-        res.cookie('userid', user._id, {maxAge: 1000})
-        const data = user;
-        data.password = '';
-        res.send({
-          code: 0,
-          data: {
-            user: data
-          },
-          msg: 'Login Success',
-        })
+        if (user.identity === 'recruiter') {
+          // Find the jobs posted by this user
+          // Only provide basic job infos like title and level
+          JobModel.where({userId: user._id}).select('_id title level').exec( function (err, jobs) {
+            if (err) {
+              logger(err);
+              res.send({code: 1, msg: err.toString()});
+              return;
+            }
+            // Put user's id in cookie.
+            // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7};
+            res.cookie('userid', user._id, {maxAge: 1000});
+            user.password = '';
+            res.send({
+              code: 0,
+              data: {
+                user: user,
+                jobs: jobs,
+              },
+              msg: 'Login Success',
+            })
+          })
+        } else {
+          // res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7};
+          res.cookie('userid', user._id, {maxAge: 1000});
+          user.password = '';
+          res.send({
+            code: 0,
+            data: {
+              user: user
+            },
+            msg: 'Login Success',
+          })
+        }
       } else {
         res.send({
           code: 1,
