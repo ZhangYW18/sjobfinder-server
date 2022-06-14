@@ -111,7 +111,8 @@ router.post('/login', function(req, res) {
 
 /* POST /user/profile deals with updating a user's profile. */
 router.post('/profile', function(req, res) {
-  const {_id, name, avatar, introduction, preference, company} = req.body
+  const {_id, name, avatar, introduction, headline, company} = req.body
+  console.log(introduction)
 
   // Judge if "avatar" parameter is out of range
   if (avatar !== undefined && (Number(avatar) < 0 || Number(avatar) >= 20)) {
@@ -121,7 +122,7 @@ router.post('/profile', function(req, res) {
 
   UserModel.findByIdAndUpdate(_id,
     {
-      name, avatar, introduction, preference, company
+      name, avatar, introduction, headline, company
     },
     {
       new: true,
@@ -138,24 +139,23 @@ router.post('/profile', function(req, res) {
   )
 });
 
-/* GET /user/profile deals with updating a user's profile. */
-// router.get('/profile/:id', function(req, res) {
-//   const {id} = req.params
-//
-//   UserModel.findById(id, function (err, user) {
-//     if (err) {
-//       logger(err)
-//       res.send({code: 1, msg: err.toString()})
-//       return;
-//     }
-//     if (user == null) {
-//       res.send({code: 1, msg: 'User Not Found'})
-//       return;
-//     }
-//     res.send({code: 0, data:user, msg: err.toString()})
-//   })
-//   //console.log(data)
-//
-// });
+/* GET /user/:identity returns the list of users given the identity of user. */
+router.get('/identity/:identity', function(req, res) {
+  const {identity} = req.params
+  UserModel.where({
+    identity,
+  }).select('-password -identity').exec( function (err, users) {
+    if (err) {
+      logger(err.toString())
+      res.send({code: 1, msg: err.toString()})
+      return;
+    }
+    res.send({
+      code: 0,
+      data: users,
+      msg: `Get User Success`
+    })
+  })
+});
 
 module.exports = router;

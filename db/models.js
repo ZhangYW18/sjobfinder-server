@@ -9,6 +9,7 @@ mongoose.connection.on('connected', () => {
 const jobSchema = mongoose.Schema({
   userId: {type: String, required: true},   // posted by
   title: {type: String, required: true},
+  // industry: {type: String, required: true},
   description: {type: String},
   level: {type: Number},                    // 1: entry level, 2: mid level, 3: senior level
   create_time: {type: Date},
@@ -27,7 +28,7 @@ const userSchema = mongoose.Schema({
   name: {type: String},
   // hunter-only fields
   introduction: {type: String},
-  preference: {type: String},               // job reference
+  headline: {type: String},               // short headline of user
   // recruiter-only fields
   company: {type: String},
 })
