@@ -5,19 +5,6 @@ mongoose.connection.on('connected', () => {
   console.log('mongodb connect success!')
 })
 
-// Define job model.
-const jobSchema = mongoose.Schema({
-  userId: {type: String, required: true},   // posted by
-  title: {type: String, required: true},
-  // industry: {type: String, required: true},
-  description: {type: String},
-  level: {type: Number},                    // 1: entry level, 2: mid level, 3: senior level
-  create_time: {type: Date},
-  update_time: {type: Date},
-})
-const jobModel = mongoose.model('job', jobSchema) // jobs
-exports.JobModel = jobModel
-
 // Define user model.
 const userSchema = mongoose.Schema({
   // common fields
@@ -34,6 +21,19 @@ const userSchema = mongoose.Schema({
 })
 const UserModel = mongoose.model('user', userSchema) // users collection
 exports.UserModel = UserModel
+
+// Define job model.
+const jobSchema = mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },   // posted by
+  title: {type: String, required: true},
+  // industry: {type: String, required: true},
+  description: {type: String},
+  level: {type: Number},                    // 1: entry level, 2: mid level, 3: senior level
+  create_time: {type: Date},
+  update_time: {type: Date},
+})
+const jobModel = mongoose.model('job', jobSchema) // jobs
+exports.JobModel = jobModel
 
 // Define chat model.
 const chatSchema = mongoose.Schema({

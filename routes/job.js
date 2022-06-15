@@ -62,6 +62,18 @@ router.get('/get/:id', function(req, res) {
   })
 });
 
+router.get('/get', function(req, res,next) {
+  const data = []
+  JobModel.find({}).populate('userId', 'company name').exec(function (err, jobs) {
+    if (err) {
+      logger(err)
+      res.send({code: 1, msg: err.toString()})
+      return;
+    }
+    res.send({code: 0, data: jobs, msg: `Get Job Success`})
+  });
+});
+
 router.get('/getByUser/:userId', function(req, res) {
   const {userId} = req.params
   console.log(userId)
