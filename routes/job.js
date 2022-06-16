@@ -3,7 +3,7 @@ var router = express.Router();
 
 var logger = require('morgan');
 
-const {JobModel, UserModel} = require('../db/models')
+const {JobModel} = require('../db/models')
 
 /* POST /job/add deals with adding a job post. */
 router.post('/add', function(req, res) {

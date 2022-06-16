@@ -24,7 +24,7 @@ exports.UserModel = UserModel
 
 // Define job model.
 const jobSchema = mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },   // posted by
+  userId: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},   // posted by
   title: {type: String, required: true},
   // industry: {type: String, required: true},
   description: {type: String},
@@ -35,14 +35,14 @@ const jobSchema = mongoose.Schema({
 const jobModel = mongoose.model('job', jobSchema) // jobs
 exports.JobModel = jobModel
 
-// Define chat model.
+// Define msg model.
 const chatSchema = mongoose.Schema({
-  from: {type: String, required: true},
-  to: {type: String, required: true},
+  from: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
+  to: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},
   chat_id: {type: String, required: true},
   content: {type: String, required: true},
-  read: {type:Boolean, default: false},
+  read: {type: Boolean, default: false},
   create_time: {type: Date},
 })
-const ChatModel = mongoose.model('chat', chatSchema) // chats collection
-exports.ChatModel = ChatModel
+const chatModel = mongoose.model('chat', chatSchema) // chats collection
+exports.ChatModel = chatModel

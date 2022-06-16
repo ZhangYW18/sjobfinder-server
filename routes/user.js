@@ -112,7 +112,6 @@ router.post('/login', function(req, res) {
 /* POST /user/profile deals with updating a user's profile. */
 router.post('/profile', function(req, res) {
   const {_id, name, avatar, introduction, headline, company} = req.body
-  console.log(introduction)
 
   // Judge if "avatar" parameter is out of range
   if (avatar !== undefined && (Number(avatar) < 0 || Number(avatar) >= 20)) {
