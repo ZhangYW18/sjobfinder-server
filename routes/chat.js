@@ -4,7 +4,11 @@ var router = express.Router();
 var logger = require('morgan');
 
 const mongoose = require('mongoose')
-const {ChatModel} = require('../db/models')
+const {ChatModel, UserModel} = require('../db/models')
+
+const getChatId = (from, to) => {
+  return from > to ? from + ',' + to : to + ',' + from;
+}
 
 /* POST /chat/add  */
 router.post('/add', function(req, res) {
@@ -29,12 +33,13 @@ router.post('/add', function(req, res) {
 
 /* GET /chat/get/:userId  */
 router.get('/get/:userId', function(req, res) {
-  const {userId} = req.params
+  let {userId} = req.params
+  userId = new mongoose.Types.ObjectId(userId)
   ChatModel.aggregate([
     { $match: {
       $or: [
-              {from: new mongoose.Types.ObjectId(userId)},
-              {to: new mongoose.Types.ObjectId(userId)},
+              {from: userId},
+              {to: userId},
       ],
     }},
     { $sort: {"create_time": -1} },
@@ -50,26 +55,66 @@ router.get('/get/:userId', function(req, res) {
         "count_unread": { $sum : '$unread'},
     }},
     { $sort: {"date": -1} },
-  ]).exec(function (err, data) {
+    { $project: {
+        partner: {
+          $cond: {
+            if: { $eq: [ userId, "$to" ] },
+            then: "$from",
+            else: "$to"
+          }
+        },
+        lastMessage: {
+          content: "$content",
+          date: "$date",
+        },
+        count_unread: {
+          $cond: {
+            if: { $eq: [ userId, "$to" ] },
+            then: "$count_unread",
+            else: 0
+          }
+        },
+      },
+    }
+  ]).exec(function (err, chats) {
     if (err) {
       logger(err)
       res.send({code: 1, msg: err.toString()})
       return;
     }
-    res.send({code: 0, data: data, msg: 'Get Chats Success'})
-  })
-});
-
-/* GET /chat/get/messages/:chat_id  */
-router.get('/get/messages/:chat_id', function(req, res) {
-  const {chat_id} = req.params
-  ChatModel.where({chat_id, read: false}).updateMany({read: true}).exec(function (err, writeOpResult) {
+    UserModel.populate(chats, {
+        path: "partner",
+        select: '_id name company avatar',
+      },
+      function (err, conversations) {
       if (err) {
         logger(err)
         res.send({code: 1, msg: err.toString()})
         return;
       }
-      ChatModel.where({chat_id}).sort({create_time: -1}).exec(function (err, msgs){
+      res.send({code: 0, data: conversations, msg: 'Get Chats Success'})
+    });
+  })
+});
+
+/* GET /chat/get/partner/:partner_id/user/:user_id  */
+router.get('/get/partner/:partner_id/user/:user_id', function(req, res) {
+  const {partner_id, user_id} = req.params
+  const chat_id = getChatId(user_id, partner_id);
+  // Mark messages as 'have been read' for the user who gets this conversation
+  ChatModel.where({
+    chat_id,
+    to: user_id,
+    read: false
+  }).updateMany({read: true}).exec(function (err, writeOpResult) {
+      if (err) {
+        logger(err)
+        res.send({code: 1, msg: err.toString()})
+        return;
+      }
+      // Select messages in this conversation
+      ChatModel.where({chat_id}).sort({create_time: -1}).select('content create_time from')
+        .exec(function (err, msgs){
         if (err) {
           logger(err)
           res.send({code: 1, msg: err.toString()})
