@@ -10,7 +10,7 @@ router.post('/add', function(req, res) {
   const {userId, title, level, description} = req.body
   const now = Date.now()
   new JobModel({
-    userId,
+    recruiter: userId,
     title,
     level,
     description,
@@ -64,7 +64,7 @@ router.get('/get/:id', function(req, res) {
 
 router.get('/get', function(req, res,next) {
   const data = []
-  JobModel.find({}).populate('userId', 'company name').exec(function (err, jobs) {
+  JobModel.find({}).populate('recruiter', 'company name').exec(function (err, jobs) {
     if (err) {
       logger(err)
       res.send({code: 1, msg: err.toString()})
@@ -78,7 +78,7 @@ router.get('/getByUser/:userId', function(req, res) {
   const {userId} = req.params
   console.log(userId)
   JobModel.find({
-    userId,
+    recruiter: userId,
   }, function (err, jobs) {
     if (err) {
       logger(err)

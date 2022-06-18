@@ -63,7 +63,7 @@ router.post('/login', function(req, res) {
         if (user.identity === 'recruiter') {
           // Find the jobs posted by this user
           // Only provide basic job infos like title and level
-          JobModel.where({userId: user._id}).select('_id title level').exec( function (err, jobs) {
+          JobModel.where({recruiter: user._id}).select('_id title level').exec( function (err, jobs) {
             if (err) {
               logger(err);
               res.send({code: 1, msg: err.toString()});

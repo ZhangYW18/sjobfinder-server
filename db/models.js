@@ -24,7 +24,7 @@ exports.UserModel = UserModel
 
 // Define job model.
 const jobSchema = mongoose.Schema({
-  userId: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},   // posted by
+  recruiter: {type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true},   // posted by
   title: {type: String, required: true},
   // industry: {type: String, required: true},
   description: {type: String},
