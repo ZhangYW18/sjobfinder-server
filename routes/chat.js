@@ -10,29 +10,8 @@ const getChatId = (from, to) => {
   return from > to ? from + ',' + to : to + ',' + from;
 }
 
-/* POST /chat/add  */
-router.post('/add', function(req, res) {
-  const {from, to, content} = req.body
-  const now = Date.now()
-  new ChatModel({
-    from,
-    to,
-    content,
-    chat_id: from > to ? from + ',' + to : to + ',' + from,
-    create_time: now,
-    read: false,
-  }).save(function (err, job) {
-    if (err) {
-      logger(err.toString())
-      res.send({code: 1, msg: err.toString()})
-      return;
-    }
-    res.send({code: 0, msg: 'Add Chat Message Success'})
-  })
-});
-
-/* GET /chat/get/:userId  */
-router.get('/get/:userId', function(req, res) {
+/* GET /chat/user/:userId gets all conversations for a given user and the last message for each conversation. */
+router.get('/user/:userId', function(req, res) {
   let {userId} = req.params
   userId = new mongoose.Types.ObjectId(userId)
   ChatModel.aggregate([
@@ -97,8 +76,8 @@ router.get('/get/:userId', function(req, res) {
   })
 });
 
-/* GET /chat/get/partner/:partner_id/user/:user_id  */
-router.get('/get/partner/:partner_id/user/:user_id', function(req, res) {
+/* GET /chat/partner/:partner_id/user/:user_id gets all messages in a conversation. */
+router.get('/partner/:partner_id/user/:user_id', function(req, res) {
   const {partner_id, user_id} = req.params
   const chat_id = getChatId(user_id, partner_id);
   // Mark messages as 'have been read' for the user who gets this conversation
@@ -113,7 +92,7 @@ router.get('/get/partner/:partner_id/user/:user_id', function(req, res) {
         return;
       }
       // Select messages in this conversation
-      ChatModel.where({chat_id}).sort({create_time: -1}).select('content create_time from')
+      ChatModel.where({chat_id}).sort({create_time: 1}).select('content create_time from')
         .exec(function (err, msgs){
         if (err) {
           logger(err)

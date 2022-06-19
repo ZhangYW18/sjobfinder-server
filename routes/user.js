@@ -28,7 +28,7 @@ router.post('/register', function(req, res) {
         identity,
       }).save(function (err, user) {
         // Cookie is valid for 7 days
-        res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7})
+        res.cookie('userid', user._id.toString(), {maxAge: 1000*60*60*24*7})
         //res.cookie('userid', user._id, {maxAge: 1000})
         res.send({
           code: 0,
@@ -70,7 +70,7 @@ router.post('/login', function(req, res) {
               return;
             }
             // Put user's id in cookie (valid for 7 days).
-            res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7});
+            res.cookie('userid', user._id.toString(), {maxAge: 1000*60*60*24*7});
             //res.cookie('userid', user._id, {maxAge: 1000});
             user.password = '';
             res.send({
@@ -83,7 +83,7 @@ router.post('/login', function(req, res) {
             })
           })
         } else {
-          res.cookie('userid', user._id, {maxAge: 1000*60*60*24*7});
+          res.cookie('userid', user._id.toString(), {maxAge: 1000*60*60*24*7});
           // res.cookie('userid', user._id, {maxAge: 1000});
           user.password = '';
           res.send({
