@@ -48,7 +48,7 @@ router.post('/update', function(req, res) {
 
 router.get('/get/:id', function(req, res) {
   const {id} = req.params
-  JobModel.findById(id, function (err, job) {
+  JobModel.findById(id).exec(function (err, job) {
     if (err) {
       logger(err)
       res.send({code: 1, msg: err.toString()})
@@ -64,7 +64,7 @@ router.get('/get/:id', function(req, res) {
 
 router.get('/get', function(req, res,next) {
   const data = []
-  JobModel.find({}).populate('recruiter', 'company name').exec(function (err, jobs) {
+  JobModel.find({}).sort({create_time: -1}).populate('recruiter', '-username -password -identity').exec(function (err, jobs) {
     if (err) {
       logger(err)
       res.send({code: 1, msg: err.toString()})

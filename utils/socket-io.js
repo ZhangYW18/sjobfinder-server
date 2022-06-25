@@ -1,4 +1,4 @@
-const {ChatModel} = require("../db/models");
+const {ChatModel, UserModel} = require("../db/models");
 
 var logger = require('morgan');
 
@@ -29,7 +29,17 @@ module.exports = function (server) {
           io.emit('receiveMsg',{code: 1, data: {msg: msg}, msg: err.toString()})
           return;
         }
-        io.emit('receiveMsg', {code: 0, data: savedMsg, msg: 'Add Chat Message Success'});
+        UserModel.populate(savedMsg, {
+            path: "from to",
+            select: '_id name company avatar',
+        }, function (err, populatedMsg) {
+          if (err) {
+            logger(err.toString())
+            io.emit('receiveMsg',{code: 1, data: {msg: msg}, msg: err.toString()})
+            return;
+          }
+          io.emit('receiveMsg', {code: 0, data: populatedMsg, msg: 'Add Chat Message Success'});
+        })
       })
     });
   });
