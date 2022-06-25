@@ -1,4 +1,4 @@
-# Job Finder - Client
+# Job Finder - Server
 
 This is the backend part of this app, frontend part of this app is [here](https://github.com/ZhangYW18/sjobfinder-client).
 
@@ -14,9 +14,10 @@ Then replace the connection url with your own in line 3 of `db/models.js` in thi
 mongoose.connect('mongodb://username:password@localhost:27017/sjobfinder?authMechanism=DEFAULT&authSource=admin')
 ```
 
-Then run it using `npm`:
+Then install dependencies and run it using `npm` under root directory of this project:
 
 ```shell
+npm install
 npm start
 ```
 
