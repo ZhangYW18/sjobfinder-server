@@ -1,6 +1,6 @@
 // Connect to database
 const mongoose = require('mongoose')
-mongoose.connect('mongodb://admin:Admin!23@localhost:27017/sjobfinder?authMechanism=DEFAULT&authSource=admin')
+mongoose.connect('mongodb://username:password@localhost:27017/sjobfinder?authMechanism=DEFAULT&authSource=admin')
 mongoose.connection.on('connected', () => {
   console.log('mongodb connect success!')
 })
